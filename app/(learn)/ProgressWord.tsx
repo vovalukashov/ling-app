@@ -8,7 +8,7 @@ interface ProgressWordProps {
 const ProgressWord: React.FC<ProgressWordProps> = ({ value }) => {
   return (
     <div className="flex gap-x-1">
-      {[...Array(5)].map((_, index) => (
+      {[...Array(4)].map((_, index) => (
         <Star
           key={index}
           className={cn("w-3 h-3", index < value && "fill-accent-foreground")}

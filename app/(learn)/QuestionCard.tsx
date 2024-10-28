@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ProgressWord from "@/app/(learn)/ProgressWord";
 import { cn } from "@/lib/utils";
-import { FC, useRef } from "react";
+import { ChangeEvent, FC, useCallback, useEffect, useRef } from "react";
 
 interface QuestionCardProps {
   word: string;
@@ -11,7 +11,7 @@ interface QuestionCardProps {
   audio: string;
   setTypedWord: (word: string) => void;
   status: "correct" | "wrong" | "not-checked";
-  audioPlay: boolean;
+  onNextCard: () => void;
 }
 
 const QuestionCard: FC<QuestionCardProps> = ({
@@ -22,20 +22,36 @@ const QuestionCard: FC<QuestionCardProps> = ({
   audio,
   setTypedWord,
   status = "not-checked",
-  audioPlay = false,
+  onNextCard,
 }) => {
   const splitSentence = sentence.split(word);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  if (audioPlay && audioRef.current) {
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-    setTimeout(() => {
-      audioRef.current?.play();
-    }, 0);
-  }
+  useEffect(() => {
+    if ((status === "correct" || status === "wrong") && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setTimeout(() => {
+        audioRef.current?.play();
+      }, 0);
+    }
+  }, [status]);
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNextCard = () => {
+    setTimeout(() => {
+      onNextCard();
+    }, 1000);
+  };
+
+  useEffect(() => {
+    audioRef.current?.addEventListener("ended", handleNextCard, { once: true });
+
+    return () => {
+      audioRef.current?.removeEventListener("ended", handleNextCard);
+    };
+  }, [word]);
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
     setTypedWord(e.target.value);
   };
 
